@@ -1,4 +1,4 @@
-import{cart, removeFromCart} from '../data/cart.js';
+import{cart, removeFromCart,updateDeliveryOption} from '../data/cart.js';
 import{products} from '../data/products.js';
 import {formatCurrency} from './utils/money.js';
 import {hello} from 'https://unpkg.com/supersimpledev@1.0.1/hello.esm.js';
@@ -35,12 +35,12 @@ cart.forEach((cartItem) => {
   });
 
   const today = dayjs();
-  const delievryDate = today.add(
-    deliveryOption.delievryDate,
+  const deliveryDate = today.add(
+    deliveryOption.deliveryDays,
     'days'
   );
 
-  const dateString =delievryDate.format(
+  const dateString =deliveryDate.format(
     'dddd, MMMM D'
   );
 
@@ -78,7 +78,6 @@ cart.forEach((cartItem) => {
         <div class="delivery-options-title">
           Choose a delivery option:
         </div>
-
         ${deliveryOptionsHTML(matchingProduct, cartItem)}
       </div>
     </div>
@@ -89,14 +88,15 @@ cart.forEach((cartItem) => {
 
 function deliveryOptionsHTML(matchingProduct, cartItem){
   let html = '';
+
   deliveryOptions.forEach((deliveryOption) => {
     const today = dayjs();
-    const delievryDate = today.add(
-      deliveryOption.delievryDate,
+    const deliveryDate = today.add(
+      deliveryOption.deliveryDays,
       'days'
     );
 
-    const dateString =delievryDate.format(
+    const dateString =deliveryDate.format(
       'dddd, MMMM D'
     );
     
@@ -109,7 +109,9 @@ function deliveryOptionsHTML(matchingProduct, cartItem){
 
     html += `
     
-      <div class="delivery-option">
+      <div class="delivery-option js-delivery-option"
+        data-product-id = "${matchingProduct.id}"
+        data-delivery-id = "${deliveryOption.id}">
             <input type="radio"
               ${isChecked ? 'checked' : ''}
               class="delivery-option-input"
@@ -119,12 +121,12 @@ function deliveryOptionsHTML(matchingProduct, cartItem){
           ${dateString}
         </div>
         <div class="delivery-option-price">
-          ${priceString} - Shipping
+          ${priceString}  Shipping
         </div>
       </div>
     </div>
     `
-  })
+  });
 
   return html;
 }
@@ -143,4 +145,11 @@ document.querySelectorAll('.js-delete-link')
     });
   })  
 
+  document.querySelectorAll('.js-delivery-option')
+    .forEach((element) =>{
+      element.addEventListener('click', () => {
+        const {productId, deliveryOptionId} = element.dataset;
+        updateDeliveryOption(productId, deliveryOptionId);
+      })
+    })
 
